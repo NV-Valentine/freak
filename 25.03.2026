@@ -1,0 +1,135 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ---------------- Product ----------------
+class Car 
+{
+private:
+    string name;
+    string body;
+    int engineHP;
+    int wheelsR;
+    string transmission;
+public:
+    void SetName(const string& n) { name = n; }
+    void SetBody(const string& b) { body = b; }
+    void SetEngine(int hp) { engineHP = hp; }
+    void SetWheels(int r) { wheelsR = r; }
+    void SetTransmission(const string& t) { transmission = t; }
+
+    void Show() 
+    {
+        cout << "-----------------------------\n";
+        cout << "Car: " << name << "\n";
+        cout << "Body: " << body << "\n";
+        cout << "Engine: " << engineHP << " HP\n";
+        cout << "Wheels: R" << wheelsR << "\n";
+        cout << "Transmission: " << transmission << "\n";
+        cout << "-----------------------------\n";
+    }
+};
+
+// ---------------- Abstract Builder ----------------
+class CarBuilder abstract 
+{
+protected:
+    Car* car;
+public:
+    CarBuilder() { car = new Car(); }
+    virtual ~CarBuilder() { delete car; }
+    Car* GetCar() { return car; }
+    virtual void BuildName() = 0;
+    virtual void BuildBody() = 0;
+    virtual void BuildEngine() = 0;
+    virtual void BuildWheels() = 0;
+    virtual void BuildTransmission() = 0;
+};
+
+// ---------------- Concrete Builders ----------------
+class LanosBuilder : public CarBuilder 
+{
+public:
+    void BuildName() override { car->SetName("Daewoo Lanos"); }
+    void BuildBody() override { car->SetBody("Sedan"); }
+    void BuildEngine() override { car->SetEngine(98); }
+    void BuildWheels() override { car->SetWheels(13); }
+    void BuildTransmission() override { car->SetTransmission("5 Manual"); }
+};
+
+class ProbeBuilder : public CarBuilder 
+{
+public:
+    void BuildName() override { car->SetName("Ford Probe"); }
+    void BuildBody() override { car->SetBody("Cupe"); }
+    void BuildEngine() override { car->SetEngine(160); }
+    void BuildWheels() override { car->SetWheels(14); }
+    void BuildTransmission() override { car->SetTransmission("4 Auto"); }
+};
+
+class PatriotBuilder : public CarBuilder 
+{
+public:
+    void BuildName() override { car->SetName("UAZ Patriot"); }
+    void BuildBody() override { car->SetBody("Unicersal"); }
+    void BuildEngine() override { car->SetEngine(120); }
+    void BuildWheels() override { car->SetWheels(16); }
+    void BuildTransmission() override { car->SetTransmission("4 Manual"); }
+};
+
+class GetzBuilder : public CarBuilder 
+{
+public:
+    void BuildName() override { car->SetName("Hyundai Getz"); }
+    void BuildBody() override { car->SetBody("Hetchback"); }
+    void BuildEngine() override { car->SetEngine(66); }
+    void BuildWheels() override { car->SetWheels(13); }
+    void BuildTransmission() override { car->SetTransmission("4 Auto"); }
+};
+
+// ---------------- Director ----------------
+class Shop 
+{
+public:
+    Car* Construct(CarBuilder* builder) 
+    {
+        builder->BuildName();
+        builder->BuildBody();
+        builder->BuildEngine();
+        builder->BuildWheels();
+        builder->BuildTransmission();
+        return builder->GetCar();
+    }
+};
+
+// ---------------- Main ----------------
+int main() 
+{
+    Shop shop;
+
+    CarBuilder* builder;
+
+    builder = new LanosBuilder();
+    Car* lanos = shop.Construct(builder);
+    lanos->Show();
+    delete builder;
+
+    builder = new ProbeBuilder();
+    Car* probe = shop.Construct(builder);
+    probe->Show();
+    delete builder;
+
+    builder = new PatriotBuilder();
+    Car* patriot = shop.Construct(builder);
+    patriot->Show();
+    delete builder;
+
+    builder = new GetzBuilder();
+    Car* getz = shop.Construct(builder);
+    getz->Show();
+    delete builder;
+
+    cout << "Push Enter for exit...";
+    cin.get();
+    return 0;
+}
