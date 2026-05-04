@@ -1,0 +1,86 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Forward declaration
+class InsuranceAgent;
+
+// Abstract element (place to visit)
+class Building {
+public:
+    virtual void Accept(InsuranceAgent* agent) = 0;
+    virtual ~Building() {}
+};
+
+// Concrete elements
+class House : public Building {
+public:
+    void Accept(InsuranceAgent* agent) override;
+};
+
+class Bank : public Building {
+public:
+    void Accept(InsuranceAgent* agent) override;
+};
+
+class Factory : public Building {
+public:
+    void Accept(InsuranceAgent* agent) override;
+};
+
+// Visitor interface
+class InsuranceAgent {
+public:
+    virtual void VisitHouse(House* house) = 0;
+    virtual void VisitBank(Bank* bank) = 0;
+    virtual void VisitFactory(Factory* factory) = 0;
+    virtual ~InsuranceAgent() {}
+};
+
+// Concrete visitor
+class BeginnerAgent : public InsuranceAgent {
+public:
+    void VisitHouse(House* house) override {
+        cout << "Offer medical insurance to the family.\n";
+    }
+    void VisitBank(Bank* bank) override {
+        cout << "Offer robbery insurance to the bank.\n";
+    }
+    void VisitFactory(Factory* factory) override {
+        cout << "Offer fire and flood insurance to the factory.\n";
+    }
+};
+
+// Implement Accept methods
+void House::Accept(InsuranceAgent* agent) {
+    agent->VisitHouse(this);
+}
+void Bank::Accept(InsuranceAgent* agent) {
+    agent->VisitBank(this);
+}
+void Factory::Accept(InsuranceAgent* agent) {
+    agent->VisitFactory(this);
+}
+
+// Demo
+int main() {
+    vector<Building*> buildings;
+    buildings.push_back(new House());
+    buildings.push_back(new Bank());
+    buildings.push_back(new Factory());
+
+    InsuranceAgent* agent = new BeginnerAgent();
+
+    for (Building* b : buildings) {
+        b->Accept(agent);
+    }
+
+    // cleanup
+    for (Building* b : buildings) {
+        delete b;
+    }
+    delete agent;
+
+    system("pause");
+    return 0;
+}
