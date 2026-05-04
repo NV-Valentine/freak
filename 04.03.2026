@@ -1,0 +1,117 @@
+#include <iostream>
+#include <string>
+#include <memory>
+
+// Абстрактный продукт
+class Transport {
+public:
+    virtual void inputData() = 0;
+    virtual void deliver() = 0;
+    virtual ~Transport() {}
+};
+
+// Конкретные продукты
+class Truck : public Transport {
+    std::string driverName;
+    int capacity;
+public:
+    void inputData() override {
+        std::cout << "Введите имя водителя грузовика: ";
+        std::getline(std::cin, driverName);
+        std::cout << "Введите грузоподъемность (тонн): ";
+        std::cin >> capacity;
+        std::cin.ignore();
+    }
+    void deliver() override {
+        std::cout << "Грузовик с водителем " << driverName
+            << " доставляет груз (" << capacity << " тонн) по суше.\n";
+    }
+};
+
+class Ship : public Transport {
+    std::string captainName;
+    int containers;
+public:
+    void inputData() override {
+        std::cout << "Введите имя капитана судна: ";
+        std::getline(std::cin, captainName);
+        std::cout << "Введите количество контейнеров: ";
+        std::cin >> containers;
+        std::cin.ignore();
+    }
+    void deliver() override {
+        std::cout << "Судно под командованием капитана " << captainName
+            << " перевозит " << containers << " контейнеров по морю.\n";
+    }
+};
+
+class Plane : public Transport {
+    std::string pilotName;
+    int passengers;
+public:
+    void inputData() override {
+        std::cout << "Введите имя пилота самолета: ";
+        std::getline(std::cin, pilotName);
+        std::cout << "Введите количество пассажиров: ";
+        std::cin >> passengers;
+        std::cin.ignore();
+    }
+    void deliver() override {
+        std::cout << "Самолет с пилотом " << pilotName
+            << " перевозит " << passengers << " пассажиров по воздуху.\n";
+    }
+};
+
+// Абстрактный создатель
+class TransportFactory {
+public:
+    virtual std::unique_ptr<Transport> createTransport() = 0;
+    virtual ~TransportFactory() {}
+};
+
+// Конкретные фабрики
+class TruckFactory : public TransportFactory {
+public:
+    std::unique_ptr<Transport> createTransport() override {
+        return std::make_unique<Truck>();
+    }
+};
+
+class ShipFactory : public TransportFactory {
+public:
+    std::unique_ptr<Transport> createTransport() override {
+        return std::make_unique<Ship>();
+    }
+};
+
+class PlaneFactory : public TransportFactory {
+public:
+    std::unique_ptr<Transport> createTransport() override {
+        return std::make_unique<Plane>();
+    }
+};
+
+// Клиентский код
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    int choice;
+    std::cout << "Выберите транспорт:\n1 - Грузовик\n2 - Судно\n3 - Самолет\nВаш выбор: ";
+    std::cin >> choice;
+    std::cin.ignore();
+
+    std::unique_ptr<TransportFactory> factory;
+
+    switch (choice) {
+    case 1: factory = std::make_unique<TruckFactory>(); break;
+    case 2: factory = std::make_unique<ShipFactory>(); break;
+    case 3: factory = std::make_unique<PlaneFactory>(); break;
+    default: std::cout << "Неверный выбор!\n"; return 0;
+    }
+
+    auto transport = factory->createTransport();
+    transport->inputData();
+    transport->deliver();
+
+    return 0;
+}
