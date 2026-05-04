@@ -1,0 +1,185 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Абстрактные продукты
+class Herbivore 
+{
+protected:
+    int weight;
+    bool life;
+public:
+    Herbivore(int w = 50) : weight(w), life(true) {}
+    virtual void EatGrass() 
+    {
+        weight += 10;
+        cout << "Herbivore eats grass. Weight = " << weight << endl;
+    }
+    int GetWeight() const { return weight; }
+    bool IsAlive() const { return life; }
+    void Die() { life = false; }
+    virtual string Name() const = 0;
+    virtual ~Herbivore() {}
+};
+
+class Carnivore 
+{
+protected:
+    int power;
+public:
+    Carnivore(int p = 60) : power(p) {}
+    virtual void Eat(Herbivore* h) 
+    {
+        if (!h->IsAlive()) 
+        {
+            cout << h->Name() << " is already dead." << endl;
+            return;
+        }
+        if (power > h->GetWeight()) 
+        {
+            power += 10;
+            h->Die();
+            cout << Name() << " eats " << h->Name()
+                << ". Power = " << power << endl;
+        }
+        else 
+        {
+            power -= 10;
+            cout << Name() << " fails to eat " << h->Name()
+                << ". Power = " << power << endl;
+        }
+    }
+    int GetPower() const { return power; }
+    virtual string Name() const = 0;
+    virtual ~Carnivore() {}
+};
+
+// Конкретные продукты
+// Африка
+class Wildebeest : public Herbivore 
+{
+public:
+    string Name() const override { return "Wildebeest"; }
+};
+
+class Lion : public Carnivore 
+{
+public:
+    string Name() const override { return "Lion"; }
+};
+
+// Северная Америка
+class Bison : public Herbivore 
+{
+public:
+    string Name() const override { return "Bison"; }
+};
+
+class Wolf : public Carnivore 
+{
+public:
+    string Name() const override { return "Wolf"; }
+};
+
+// Евразия
+class Elk : public Herbivore 
+{
+public:
+    string Name() const override { return "Elk"; }
+};
+
+class Tiger : public Carnivore 
+{
+public:
+    string Name() const override { return "Tiger"; }
+};
+
+// Абстрактная фабрика 
+class Continent 
+{
+public:
+    virtual Herbivore* CreateHerbivore() = 0;
+    virtual Carnivore* CreateCarnivore() = 0;
+    virtual ~Continent() {}
+};
+
+// Конкретные фабрики 
+class Africa : public Continent 
+{
+public:
+    Herbivore* CreateHerbivore() override { return new Wildebeest(); }
+    Carnivore* CreateCarnivore() override { return new Lion(); }
+};
+
+class NorthAmerica : public Continent 
+{
+public:
+    Herbivore* CreateHerbivore() override { return new Bison(); }
+    Carnivore* CreateCarnivore() override { return new Wolf(); }
+};
+
+class Eurasia : public Continent 
+{
+public:
+    Herbivore* CreateHerbivore() override { return new Elk(); }
+    Carnivore* CreateCarnivore() override { return new Tiger(); }
+};
+
+// Клиент 
+class AnimalWorld 
+{
+private:
+    Herbivore* herbivore;
+    Carnivore* carnivore;
+public:
+    AnimalWorld(Continent* factory) 
+    {
+        herbivore = factory->CreateHerbivore();
+        carnivore = factory->CreateCarnivore();
+    }
+    ~AnimalWorld() 
+    {
+        delete herbivore;
+        delete carnivore;
+    }
+    void MealsHerbivores() 
+    {
+        cout << herbivore->Name() << " starts eating grass..." << endl;
+        herbivore->EatGrass();
+    }
+    void NutritionCarnivores() 
+    {
+        cout << carnivore->Name() << " starts hunting..." << endl;
+        carnivore->Eat(herbivore);
+    }
+};
+
+// Тестирование 
+int main() 
+{
+    Continent* africa = new Africa();
+    Continent* na = new NorthAmerica();
+    Continent* eurasia = new Eurasia();
+
+    AnimalWorld world1(africa);
+    AnimalWorld world2(na);
+    AnimalWorld world3(eurasia);
+
+    cout << "\n--- Africa ---\n";
+    world1.MealsHerbivores();
+    world1.NutritionCarnivores();
+
+    cout << "\n--- North America ---\n";
+    world2.MealsHerbivores();
+    world2.NutritionCarnivores();
+
+    cout << "\n--- Eurasia ---\n";
+    world3.MealsHerbivores();
+    world3.NutritionCarnivores();
+
+    delete africa;
+    delete na;
+    delete eurasia;
+
+    return 0;
+}
