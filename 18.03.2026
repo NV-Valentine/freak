@@ -1,0 +1,120 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ====== Базовий інтерфейс Прототипа ======
+class Prototype {
+public:
+    virtual Prototype* clone() const = 0; // метод копіювання
+    virtual void showInfo() const = 0;
+    virtual ~Prototype() {}
+};
+
+// ====== Вкладені класи ======
+class Engine : public Prototype {
+    string type;
+public:
+    Engine(string t) : type(t) {}
+    Prototype* clone() const override { return new Engine(*this); }
+    void showInfo() const override { cout << "Двигун: " << type << endl; }
+};
+
+class Gearbox : public Prototype {
+    string transmission;
+public:
+    Gearbox(string tr) : transmission(tr) {}
+    Prototype* clone() const override { return new Gearbox(*this); }
+    void showInfo() const override { cout << "Коробка передач: " << transmission << endl; }
+};
+
+class Manufacturer : public Prototype {
+    string name;
+public:
+    Manufacturer(string n) : name(n) {}
+    Prototype* clone() const override { return new Manufacturer(*this); }
+    void showInfo() const override { cout << "Виробник: " << name << endl; }
+};
+
+class Body : public Prototype {
+    string style;
+public:
+    Body(string s) : style(s) {}
+    Prototype* clone() const override { return new Body(*this); }
+    void showInfo() const override { cout << "Кузов: " << style << endl; }
+};
+
+class Wheels : public Prototype {
+    int size;
+public:
+    Wheels(int s) : size(s) {}
+    Prototype* clone() const override { return new Wheels(*this); }
+    void showInfo() const override { cout << "Колеса: " << size << " дюймів" << endl; }
+};
+
+// ====== Складний об’єкт Автомобіль ======
+class Car : public Prototype {
+    Engine* engine;
+    Gearbox* gearbox;
+    Manufacturer* manufacturer;
+    Body* body;
+    Wheels* wheels;
+
+public:
+    Car(Engine* e, Gearbox* g, Manufacturer* m, Body* b, Wheels* w)
+        : engine(e), gearbox(g), manufacturer(m), body(b), wheels(w) {}
+
+    // Реалізація патерну Прототип
+    Prototype* clone() const override {
+        return new Car(
+            (Engine*)engine->clone(),
+            (Gearbox*)gearbox->clone(),
+            (Manufacturer*)manufacturer->clone(),
+            (Body*)body->clone(),
+            (Wheels*)wheels->clone()
+        );
+    }
+
+    void showInfo() const override {
+        cout << "=== Автомобіль ===" << endl;
+        engine->showInfo();
+        gearbox->showInfo();
+        manufacturer->showInfo();
+        body->showInfo();
+        wheels->showInfo();
+        cout << "==================" << endl;
+    }
+
+    ~Car() {
+        delete engine;
+        delete gearbox;
+        delete manufacturer;
+        delete body;
+        delete wheels;
+    }
+};
+
+// ====== Демонстрація роботи ======
+int main() {
+    // Створюємо оригінальний автомобіль
+    Car* original = new Car(
+        new Engine("V8 Turbo"),
+        new Gearbox("Автоматична"),
+        new Manufacturer("BMW"),
+        new Body("Седан"),
+        new Wheels(18)
+    );
+
+    cout << "Оригінал:" << endl;
+    original->showInfo();
+
+    // Копіюємо автомобіль за допомогою патерну Прототип
+    Car* copy = (Car*)original->clone();
+
+    cout << "\nКопія:" << endl;
+    copy->showInfo();
+
+    delete original;
+    delete copy;
+
+    return 0;
+}
