@@ -1,0 +1,90 @@
+#include <iostream>
+#include <memory>
+#include <string>
+
+// ===== Реализация (Implementor) =====
+class Device {
+public:
+    virtual ~Device() = default;
+    virtual std::string getInfo() const = 0;
+};
+
+// Конкретные реализации
+class VideoCard : public Device {
+public:
+    std::string getInfo() const override {
+        return "Видеокарта: NVIDIA GeForce RTX 3060, 12GB";
+    }
+};
+
+class Processor : public Device {
+public:
+    std::string getInfo() const override {
+        return "Процессор: Intel Core i7-12700K, 12 ядер";
+    }
+};
+
+class HardDisk : public Device {
+public:
+    std::string getInfo() const override {
+        return "Жесткий диск: Seagate Barracuda 2TB, HDD";
+    }
+};
+
+// Новое устройство (расширение библиотеки)
+class RAM : public Device {
+public:
+    std::string getInfo() const override {
+        return "Оперативная память: Corsair Vengeance 16GB DDR4";
+    }
+};
+
+// ===== Абстракция (Abstraction) =====
+class Report {
+protected:
+    std::shared_ptr<Device> device;
+public:
+    Report(std::shared_ptr<Device> dev) : device(dev) {}
+    virtual ~Report() = default;
+    virtual void showReport() const = 0;
+};
+
+// Конкретные абстракции
+class SimpleReport : public Report {
+public:
+    SimpleReport(std::shared_ptr<Device> dev) : Report(dev) {}
+    void showReport() const override {
+        std::cout << "[Простой отчет]\n" << device->getInfo() << "\n";
+    }
+};
+
+class DetailedReport : public Report {
+public:
+    DetailedReport(std::shared_ptr<Device> dev) : Report(dev) {}
+    void showReport() const override {
+        std::cout << "[Детализированный отчет]\n"
+            << "Устройство: " << device->getInfo() << "\n"
+            << "Дата генерации: 02.04.2026\n"
+            << "Автор: Михаил\n";
+    }
+};
+
+// ===== Демонстрация =====
+int main() {
+    std::shared_ptr<Device> gpu = std::make_shared<VideoCard>();
+    std::shared_ptr<Device> cpu = std::make_shared<Processor>();
+    std::shared_ptr<Device> hdd = std::make_shared<HardDisk>();
+    std::shared_ptr<Device> ram = std::make_shared<RAM>();
+
+    SimpleReport report1(gpu);
+    DetailedReport report2(cpu);
+    SimpleReport report3(hdd);
+    DetailedReport report4(ram);
+
+    report1.showReport();
+    report2.showReport();
+    report3.showReport();
+    report4.showReport();
+
+    return 0;
+}
