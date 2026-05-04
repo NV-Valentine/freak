@@ -1,0 +1,69 @@
+#include <iostream>
+#include <memory>
+#include <string>
+
+// Strategy interface
+class RouteStrategy {
+public:
+    virtual ~RouteStrategy() = default;
+    virtual std::string buildRoute(const std::string& pointA, const std::string& pointB) const = 0;
+};
+
+// Car route strategy
+class RoadStrategy : public RouteStrategy {
+public:
+    std::string buildRoute(const std::string& pointA, const std::string& pointB) const override {
+        return "Car route: " + pointA + " -> " + pointB;
+    }
+};
+
+// Walking route strategy
+class WalkingStrategy : public RouteStrategy {
+public:
+    std::string buildRoute(const std::string& pointA, const std::string& pointB) const override {
+        return "Walking route: " + pointA + " -> " + pointB;
+    }
+};
+
+// Public transport route strategy
+class PublicTransportStrategy : public RouteStrategy {
+public:
+    std::string buildRoute(const std::string& pointA, const std::string& pointB) const override {
+        return "Public transport route: " + pointA + " -> " + pointB;
+    }
+};
+
+// Navigator
+class Navigator {
+private:
+    std::unique_ptr<RouteStrategy> routeStrategy;
+public:
+    void setStrategy(std::unique_ptr<RouteStrategy> strategy) {
+        routeStrategy = std::move(strategy);
+    }
+
+    void buildRoute(const std::string& pointA, const std::string& pointB) const {
+        if (!routeStrategy) {
+            std::cout << "No strategy selected!" << std::endl;
+        }
+        else {
+            std::cout << routeStrategy->buildRoute(pointA, pointB) << std::endl;
+        }
+    }
+};
+
+// Demo
+int main() {
+    Navigator navigator;
+
+    navigator.setStrategy(std::make_unique<RoadStrategy>());
+    navigator.buildRoute("Odessa", "Kyiv");
+
+    navigator.setStrategy(std::make_unique<WalkingStrategy>());
+    navigator.buildRoute("Park", "Shop");
+
+    navigator.setStrategy(std::make_unique<PublicTransportStrategy>());
+    navigator.buildRoute("University", "Home");
+
+    return 0;
+}
