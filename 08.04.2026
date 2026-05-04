@@ -1,0 +1,171 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <chrono>
+
+void printWithDelay(const std::string& message, int ms = 500) {
+    std::cout << message << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+// === SUBSYSTEM CLASSES ===
+class PowerSupply {
+public:
+    void powerOn() { printWithDelay("Power Supply: Power ON"); }
+    void powerOff() { printWithDelay("Power Supply: Power OFF"); }
+    void supplyToGPU() { printWithDelay("Power Supply: Supplying power to GPU"); }
+    void stopGPU() { printWithDelay("Power Supply: Stopping power to GPU"); }
+    void supplyToRAM() { printWithDelay("Power Supply: Supplying power to RAM"); }
+    void stopRAM() { printWithDelay("Power Supply: Stopping power to RAM"); }
+    void supplyToDiskDrive() { printWithDelay("Power Supply: Supplying power to Optical Drive"); }
+    void stopDiskDrive() { printWithDelay("Power Supply: Stopping power to Optical Drive"); }
+    void supplyToHDD() { printWithDelay("Power Supply: Supplying power to HDD"); }
+    void stopHDD() { printWithDelay("Power Supply: Stopping power to HDD"); }
+};
+
+class Sensors {
+public:
+    void checkVoltage() { printWithDelay("Sensors: Voltage OK"); }
+    void checkTempPSU() { printWithDelay("Sensors: PSU temperature normal"); }
+    void checkTempGPU() { printWithDelay("Sensors: GPU temperature normal"); }
+    void checkTempRAM() { printWithDelay("Sensors: RAM temperature normal"); }
+    void checkAllSystems() { printWithDelay("Sensors: All systems temperature normal"); }
+};
+
+class GPU {
+public:
+    void start() { printWithDelay("GPU: Started"); }
+    void checkMonitor() { printWithDelay("GPU: Monitor connection OK"); }
+    void displayRAMInfo() { printWithDelay("GPU: Displaying RAM info"); }
+    void displayDiskInfo() { printWithDelay("GPU: Displaying Optical Drive info"); }
+    void displayHDDInfo() { printWithDelay("GPU: Displaying HDD info"); }
+    void farewellMessage() { printWithDelay("GPU: Goodbye message displayed"); }
+};
+
+class RAM {
+public:
+    void start() { printWithDelay("RAM: Started"); }
+    void analyze() { printWithDelay("RAM: Memory analysis complete"); }
+    void clear() { printWithDelay("RAM: Memory cleared"); }
+};
+
+class OpticalDrive {
+public:
+    void start() { printWithDelay("Optical Drive: Started"); }
+    void checkDisk() { printWithDelay("Optical Drive: Disk check complete"); }
+    void reset() { printWithDelay("Optical Drive: Returned to initial position"); }
+};
+
+class HDD {
+public:
+    void start() { printWithDelay("HDD: Started"); }
+    void checkBootSector() { printWithDelay("HDD: Boot sector OK"); }
+    void stop() { printWithDelay("HDD: Stopped"); }
+};
+
+// === FACADE ===
+class ComputerFacade {
+private:
+    PowerSupply psu;
+    Sensors sensors;
+    GPU gpu;
+    RAM ram;
+    OpticalDrive drive;
+    HDD hdd;
+
+public:
+    void BeginWork() {
+        printWithDelay("=== Computer Boot Sequence ===", 700);
+
+        // 1% chance of failure
+        int chance = std::rand() % 100;
+        if (chance == 0) {
+            printWithDelay("ERROR: Boot failed due to unexpected system issue!", 1000);
+            printWithDelay("System halted. Please try again.", 1000);
+            return;
+        }
+
+        psu.powerOn();
+        sensors.checkVoltage();
+        sensors.checkTempPSU();
+        sensors.checkTempGPU();
+        psu.supplyToGPU();
+        gpu.start();
+        gpu.checkMonitor();
+        sensors.checkTempRAM();
+        psu.supplyToRAM();
+        ram.start();
+        ram.analyze();
+        gpu.displayRAMInfo();
+        psu.supplyToDiskDrive();
+        drive.start();
+        drive.checkDisk();
+        gpu.displayDiskInfo();
+        psu.supplyToHDD();
+        hdd.start();
+        hdd.checkBootSector();
+        gpu.displayHDDInfo();
+        sensors.checkAllSystems();
+        printWithDelay("=== Boot Completed Successfully ===", 700);
+    }
+
+    void ShutDown() {
+        printWithDelay("=== Computer Shutdown Sequence ===", 700);
+        hdd.stop();
+        ram.clear();
+        ram.analyze();
+        gpu.farewellMessage();
+        drive.reset();
+        psu.stopGPU();
+        psu.stopRAM();
+        psu.stopDiskDrive();
+        psu.stopHDD();
+        sensors.checkVoltage();
+        psu.powerOff();
+        printWithDelay("=== Shutdown Completed Successfully ===", 700);
+    }
+
+    void Reboot() {
+        printWithDelay("=== Computer Reboot Sequence ===", 700);
+        ShutDown();
+        printWithDelay("\nRestarting...\n", 1000);
+        BeginWork();
+    }
+};
+
+// === MAIN ===
+int main() {
+    std::srand(std::time(nullptr));
+    ComputerFacade computer;
+
+    int choice;
+    do {
+        std::cout << "\nChoose an action:\n";
+        std::cout << "1 - Power ON\n";
+        std::cout << "2 - Reboot\n";
+        std::cout << "3 - Shutdown\n";
+        std::cout << "0 - Exit program\n";
+        std::cout << "Your choice: ";
+        std::cin >> choice;
+
+        switch (choice) {
+        case 1:
+            computer.BeginWork();
+            break;
+        case 2:
+            computer.Reboot();
+            break;
+        case 3:
+            computer.ShutDown();
+            break;
+        case 0:
+            std::cout << "Exiting program...\n";
+            break;
+        default:
+            std::cout << "Invalid choice. Try again.\n";
+        }
+    } while (choice != 0);
+
+    return 0;
+}
